@@ -1,61 +1,151 @@
-'use client'
-import { useEffect, useState } from "react";
-import { sendMessageToRoom } from "@/utils/sendMessage";
-import useRoomMessages from "@/hooks/useRoomMessages";
-import { useParams } from "next/navigation";
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { collection, doc, getDocs, query, where  } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { sendMessageToRoom } from '@/utils/sendMessage';
+import useRoomMessages from '@/hooks/useRoomMessages';
 
 export default function ChatRoom() {
-  const [message, setMessage] = useState("");
-  
-  const {roomId} = useParams();
+  const { roomId } = useParams();
+  console.log(roomId);
   const messages = useRoomMessages(roomId);
-  console.log(typeof roomId,roomId)
+  const [message, setMessage] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [userVerified, setUserVerified] = useState(false);
+  const [passKeyInput, setPassKeyInput] = useState('');
+  const [storedPassKey, setStoredPassKey] = useState('');
+  const [error, setError] = useState('');
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (roomId) fetchPassKey();
+  }, [roomId]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const fetchPassKey = async () => {
+    try {
+      const roomQuery = query(
+        collection(db, 'ChatRooms'),
+        where('roomId', '==', Number(roomId))
+      );
+  
+      const querySnapshot = await getDocs(roomQuery);
+  
+      if (!querySnapshot.empty) {
+        const docData = querySnapshot.docs[0].data();
+        setStoredPassKey(docData.passKey);
+        console.log('Stored Passkey:', docData.passKey);
+      } else {
+        setError("Room ID not found.");
+        console.error("No room found with ID:", roomId);
+      }
+    } catch (err) {
+      console.error("Error fetching room:", err);
+      setError("Something went wrong fetching the room.");
+    }
+  };
+  
+
+  const handleAuthSubmit = () => {
+    if (!passKeyInput || !nickname) {
+      setError('Please enter both fields.');
+      return;
+    }
+    if (passKeyInput === storedPassKey) {
+      setUserVerified(true);
+      setError('');
+    } else {
+      setError('Incorrect passkey.');
+    }
+  };
 
   const handleSend = async (e) => {
     e.preventDefault();
     if (message.trim()) {
-      await sendMessageToRoom(roomId, message, "Vipul");
-      setMessage("");
+      await sendMessageToRoom(roomId, message, nickname);
+      setMessage('');
     }
   };
 
+  if (!userVerified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="bg-gray-800 p-6 rounded-xl w-full max-w-sm shadow-lg space-y-4">
+          <h2 className="text-2xl font-bold">🔐 Enter Room Details</h2>
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="Enter your nickname"
+            className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none"
+          />
+          <input
+            type="password"
+            value={passKeyInput}
+            onChange={(e) => setPassKeyInput(e.target.value)}
+            placeholder="Enter room passkey"
+            className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none"
+          />
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <button
+            onClick={handleAuthSubmit}
+            className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg font-semibold transition"
+          >
+            Join Room
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full p-4 bg-gray-900 text-white rounded-xl shadow-lg max-w-md mx-auto">
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto space-y-2 mb-4">
-        {messages.map(msg => (
+    <div className="min-h-screen flex flex-col bg-gray-900 text-white p-4 max-w-2xl mx-auto">
+      <h1 className="text-xl font-bold mb-4 text-center">💬 Chat Room - {roomId}</h1>
+
+      <div className="flex-1 overflow-y-auto space-y-3 bg-gray-800 p-4 rounded-lg shadow-md">
+        {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`p-3 rounded-lg ${
-              msg.sender === 'Vipul' ? 'bg-blue-600 text-white self-end' : 'bg-gray-700 text-white'
+            className={`max-w-xs px-4 py-2 rounded-lg shadow ${
+              msg.sender === nickname
+                ? 'bg-blue-600 self-end ml-auto text-white'
+                : 'bg-gray-700 self-start'
             }`}
           >
-            <strong className="block">{msg.sender}</strong>
-            <span>{msg.text}</span>
+            <strong className="block text-sm text-gray-200">{msg.sender}</strong>
+            <p className="text-base">{msg.text}</p>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
-  
-      {/* Input & Send */}
-      <div className="flex items-center gap-2">
-        <form>
+
+      <form
+        onSubmit={handleSend}
+        className="flex items-center gap-2 mt-4"
+      >
         <input
           type="text"
           value={message}
-          onChange={e => setMessage(e.target.value)}
+          onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
           className="flex-1 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
-          onClick={handleSend}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition"
+          type="submit"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white"
         >
           Send
         </button>
-        </form>
-      </div>
+      </form>
     </div>
   );
-  
 }
-
