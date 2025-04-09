@@ -50,7 +50,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center px-4">
       <h1 className="text-4xl font-bold mb-8">💬 Chatty</h1>
 
-      <div className="space-x-4">
+      <div className="flex flex-col md:flex-row gap-2 items-center">
         <button
           onClick={() => setShowModal(true)}
           className="bg-blue-600 hover:bg-blue-700 transition px-6 py-2 rounded-lg text-lg font-medium"

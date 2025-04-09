@@ -17,6 +17,8 @@ export default function ChatRoom() {
   const [userVerified, setUserVerified] = useState(false);
   const [passKeyInput, setPassKeyInput] = useState('');
   const [storedPassKey, setStoredPassKey] = useState('');
+  const [sending, setSending] = useState(false);
+
   const [error, setError] = useState('');
   const messagesEndRef = useRef(null);
 
@@ -72,8 +74,10 @@ export default function ChatRoom() {
   const handleSend = async (e) => {
     e.preventDefault();
     if (message.trim()) {
-      await sendMessageToRoom(roomId, message, nickname);
       setMessage('');
+      setSending(true);
+      await sendMessageToRoom(roomId, message, nickname);
+      setSending(false);
     }
   };
 
@@ -109,17 +113,21 @@ export default function ChatRoom() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900 text-white p-4 max-w-2xl mx-auto">
+    <div className="max-h-screen flex flex-col bg-gray-900 text-white p-4 max-w-2xl mx-auto">
       <h1 className="text-xl font-bold mb-4 text-center">💬 Chat Room - {roomId}</h1>
 
-      <div className="flex-1 overflow-y-auto space-y-3 bg-gray-800 p-4 rounded-lg shadow-md max-h-[80vh]">
+      <div className="flex-1 overflow-y-auto space-y-3 bg-gray-800 p-4 rounded-lg shadow-md max-h-[4/5]">
       {messages.map((msg) => (
         <div
           key={msg.id}
           className={`p-3 rounded-lg whitespace-pre-wrap break-words ${
             msg.sender === nickname
               ? 'bg-blue-600 text-white self-end'
-              : 'bg-gray-700 text-white'
+              : (
+                msg.sender === 'Chatty'
+              )
+              ?'bg-violet-600 text-white'
+              :  'bg-gray-700 text-white'
           }`}
         >
           <strong className="block mb-1">{msg.sender}</strong>
@@ -143,6 +151,7 @@ export default function ChatRoom() {
         <button
           type="submit"
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white"
+          disabled={sending}
         >
           Send
         </button>
