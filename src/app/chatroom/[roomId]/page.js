@@ -113,7 +113,7 @@ export default function ChatRoom() {
   }
 
   return (
-    <div className="max-h-screen flex flex-col bg-gray-900 text-white p-4 max-w-2xl mx-auto">
+    <div className=" min-h-screen max-h-screen flex flex-col bg-gray-900 text-white p-4 max-w-2xl mx-auto">
       <h1 className="text-xl font-bold mb-4 text-center">💬 Chat Room - {roomId}</h1>
 
       <div className="flex-1 overflow-y-auto space-y-3 bg-gray-800 p-4 rounded-lg shadow-md max-h-[4/5]">
