@@ -6,6 +6,7 @@ import { collection, doc, getDocs, query, where  } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { sendMessageToRoom } from '@/utils/sendMessage';
 import useRoomMessages from '@/hooks/useRoomMessages';
+import MessageTextBox from '@/app/components/MessageTextBox';
 
 export default function ChatRoom() {
   const { roomId } = useParams();
@@ -112,19 +113,19 @@ export default function ChatRoom() {
       <h1 className="text-xl font-bold mb-4 text-center">💬 Chat Room - {roomId}</h1>
 
       <div className="flex-1 overflow-y-auto space-y-3 bg-gray-800 p-4 rounded-lg shadow-md max-h-[80vh]">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`max-w-xs px-4 py-2 rounded-lg shadow ${
-              msg.sender === nickname
-                ? 'bg-blue-600 self-end ml-auto text-white'
-                : 'bg-gray-700 self-start'
-            }`}
-          >
-            <strong className="block text-sm text-gray-200">{msg.sender}</strong>
-            <p className="text-base">{msg.text}</p>
-          </div>
-        ))}
+      {messages.map((msg) => (
+        <div
+          key={msg.id}
+          className={`p-3 rounded-lg whitespace-pre-wrap break-words ${
+            msg.sender === nickname
+              ? 'bg-blue-600 text-white self-end'
+              : 'bg-gray-700 text-white'
+          }`}
+        >
+          <strong className="block mb-1">{msg.sender}</strong>
+            <MessageTextBox textData={msg.text}/>
+        </div>
+      ))}
         <div ref={messagesEndRef} />
       </div>
 
@@ -132,13 +133,13 @@ export default function ChatRoom() {
         onSubmit={handleSend}
         className="flex items-center gap-2 mt-4"
       >
-        <input
+        <textarea
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Type your message..."
           className="flex-1 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        ></textarea>
         <button
           type="submit"
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white"
