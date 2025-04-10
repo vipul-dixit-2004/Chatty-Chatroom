@@ -81,6 +81,10 @@ export default function ChatRoom() {
     }
   };
 
+  const handleShare = async() =>{
+    navigator.clipboard.writeText(window.location);
+    alert("Invite link copied!!");
+  }
   if (!userVerified) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
@@ -114,8 +118,11 @@ export default function ChatRoom() {
 
   return (
     <div className=" min-h-screen max-h-screen flex flex-col bg-gray-900 text-white p-4 max-w-2xl mx-auto">
-      <h1 className="text-xl font-bold mb-4 text-center">💬 Chat Room - {roomId}</h1>
-
+      <div className='flex max-w-2xl flex-row justify-center items-center'>
+        <h1 className="text-xl font-bold mb-4 text-center">💬 Chat Room - {roomId}</h1>
+        <button className="text-md hidden md:block absolute pr-4 font-bold mb-4 right-0" onClick={handleShare}>Share 🔗</button>
+        <button className="text-md md:hidden absolute pr-4 font-bold mb-4 right-0" onClick={handleShare}>🔗</button>
+      </div>
       <div className="flex-1 overflow-y-auto space-y-3 bg-gray-800 p-4 rounded-lg shadow-md max-h-[4/5]">
       {messages.map((msg) => (
         <div
