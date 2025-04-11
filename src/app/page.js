@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import bcrypt from 'bcryptjs';
 
 export default function Home() {
   const router = useRouter();
@@ -15,12 +16,13 @@ export default function Home() {
   const handleCreateRoom = async () => {
     const timestamp = Date.now();
     const randomId = Math.floor((timestamp / 100) % 10000000);
-    console.log('Random ID:', randomId);
-
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassKey = bcrypt.hashSync(passKey, salt);
+  
     localStorage.setItem('LastRoomID', randomId.toString());
-    await storeNewRoomID(randomId, passKey);
+    await storeNewRoomID(randomId, hashedPassKey);
   };
-
+  
   const handleJoinRoom = async () =>{
     if(chatRoomId.length<7){
       setErrorMsg('Invalid RoomId');
@@ -46,6 +48,7 @@ export default function Home() {
     }
   };
 
+  
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center px-4">
       <h1 className="text-4xl font-bold mb-8">💬 Chatty</h1>

@@ -46,7 +46,6 @@ export default function ChatRoom() {
       if (!querySnapshot.empty) {
         const docData = querySnapshot.docs[0].data();
         setStoredPassKey(docData.passKey);
-        console.log('Stored Passkey:', docData.passKey);
       } else {
         setError("Room ID not found.");
         console.error("No room found with ID:", roomId);
@@ -59,17 +58,20 @@ export default function ChatRoom() {
   
 
   const handleAuthSubmit = () => {
-    if (!passKeyInput || !nickname) {
-      setError('Please enter both fields.');
-      return;
-    }
-    if (passKeyInput === storedPassKey) {
-      setUserVerified(true);
-      setError('');
-    } else {
-      setError('Incorrect passkey.');
-    }
-  };
+  if (!passKeyInput || !nickname) {
+    setError('Please enter both fields.');
+    return;
+  }
+
+  const isMatch = bcrypt.compareSync(passKeyInput, storedPassKey);
+  if (isMatch) {
+    setUserVerified(true);
+    setError('');
+  } else {
+    setError('Incorrect passkey.');
+  }
+};
+
 
   const handleSend = async (e) => {
     e.preventDefault();
