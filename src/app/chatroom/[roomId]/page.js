@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase';
 import { sendMessageToRoom } from '@/utils/sendMessage';
 import useRoomMessages from '@/hooks/useRoomMessages';
 import MessageTextBox from '@/app/components/MessageTextBox';
+import bcrypt from 'bcryptjs';
 
 export default function ChatRoom() {
   const { roomId } = useParams();
@@ -58,20 +59,20 @@ export default function ChatRoom() {
   
 
   const handleAuthSubmit = () => {
-  if (!passKeyInput || !nickname) {
-    setError('Please enter both fields.');
-    return;
-  }
-
-  const isMatch = bcrypt.compareSync(passKeyInput, storedPassKey);
-  if (isMatch) {
-    setUserVerified(true);
-    setError('');
-  } else {
-    setError('Incorrect passkey.');
-  }
-};
-
+    if (!passKeyInput || !nickname) {
+      setError('Please enter both fields.');
+      return;
+    }
+  
+    const isMatch = bcrypt.compareSync(passKeyInput, storedPassKey);
+    if (isMatch) {
+      setUserVerified(true);
+      setError('');
+    } else {
+      setError('Incorrect passkey.');
+    }
+  };
+  
 
   const handleSend = async (e) => {
     e.preventDefault();
