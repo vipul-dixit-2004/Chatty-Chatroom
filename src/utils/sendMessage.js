@@ -16,7 +16,7 @@ export const sendMessageToRoom = async (roomId, messageText, senderName) => {
       timestamp: serverTimestamp(),
     });
     if(useChattyAI){
-      const response = await ChattyAI(messageText);
+      const response = await ChattyAI(roomId,messageText);
       await addDoc(collection(db, "ChatRooms", roomId, "messages"), {
         text: response,
         sender: "Chatty",
