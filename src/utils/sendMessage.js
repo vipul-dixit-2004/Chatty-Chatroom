@@ -1,6 +1,5 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useState } from "react";
 import ChattyAI from "./ChattyAI";
 
 // Call this function with a roomId

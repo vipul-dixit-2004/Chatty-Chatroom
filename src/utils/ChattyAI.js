@@ -56,7 +56,7 @@ export default async function ChattyAI(chatroomId, message) {
     const result = await chatInstance.sendMessage(message);
     
     if (result?.response?.text) {
-      console.log(result.response)
+
       return result.response.text();
     } else {
       return "No valid response received from the assistant.";
