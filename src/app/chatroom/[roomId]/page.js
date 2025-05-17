@@ -18,7 +18,7 @@ export default function ChatRoom() {
   const [passKeyInput, setPassKeyInput] = useState('');
   const [storedPassKey, setStoredPassKey] = useState('');
   const [sending, setSending] = useState(false);
-
+  const dates = new Set();
   const [error, setError] = useState('');
   const messagesEndRef = useRef(null);
 
@@ -87,6 +87,16 @@ export default function ChatRoom() {
     navigator.clipboard.writeText(window.location);
     alert("Invite link copied!!");
   }
+
+  const checkMessageDate = (date) => {
+    const renderDate = new Date(date?.seconds * 1000).toDateString();
+    if (dates.has(renderDate)) {
+      return true;
+    } else {
+      dates.add(renderDate)
+      return false;
+    }
+  }
   if (!userVerified) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
@@ -126,25 +136,41 @@ export default function ChatRoom() {
         <button className="text-md md:hidden absolute pr-4 font-bold mb-4 right-0" onClick={handleShare}>🔗</button>
       </div>
       <div className="flex-1 overflow-y-auto space-y-3 bg-gray-800 p-4 rounded-lg shadow-md max-h-[4/5]">
-        {messages.map((msg, idx) => (
-          <div
-            key={msg.id}
-            className={`p-3 rounded-lg whitespace-pre-wrap break-words ${msg.sender === nickname
-              ? 'bg-blue-600 text-white self-end'
-              : (
-                msg.sender === 'Chatty'
-              )
-                ? 'bg-violet-600 text-white'
-                : 'bg-gray-700 text-white'
-              }`}
-          >
-            {idx ? ((messages[idx - 1].sender != msg.sender) ?
-              <strong className="block mb-1">{msg.sender}</strong> : null) : <strong className="block mb-1">{msg.sender}</strong>}
-            <MessageTextBox textData={msg.text} />
-            <p className='text-right leading-0 text-[10px] w-full'>{msg.timestamp ? (new Date(msg.timestamp.seconds * 1000).toString().split(' ')[4].substring(0, 5)) : "recent"
-            }</p>
-          </div>
-        ))}
+        {
+          messages.map((msg, idx) => {
+            const isSameDate = checkMessageDate(msg.timestamp);
+            const showSender = idx === 0 || messages[idx - 1].sender !== msg.sender;
+
+            return (
+              <div key={msg.id}>
+                {!isSameDate && msg.timestamp && (
+                  <div className="text-center text-xs text-gray-400 my-2">
+                    {new Date(msg.timestamp.seconds * 1000).toDateString()}
+                  </div>
+                )}
+                <div
+                  className={`p-3 rounded-lg whitespace-pre-wrap break-words my-1 ${msg.sender === nickname
+                    ? 'bg-blue-600 text-white self-end'
+                    : msg.sender === 'Chatty'
+                      ? 'bg-violet-600 text-white'
+                      : 'bg-gray-700 text-white'
+                    }`}
+                >
+                  {showSender && (
+                    <strong className="block mb-1">{msg.sender}</strong>
+                  )}
+                  <MessageTextBox textData={msg.text} />
+                  <p className='text-right leading-0 text-[10px] w-full'>
+                    {msg.timestamp
+                      ? new Date(msg.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      : "recent"}
+                  </p>
+                </div>
+              </div>
+            );
+          })
+        }
+
         <div ref={messagesEndRef} />
       </div>
 
