@@ -28,7 +28,7 @@ export default function ChatRoom() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, userVerified]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
