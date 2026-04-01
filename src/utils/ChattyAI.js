@@ -12,7 +12,7 @@ export function getChatInstance(chatroomId) {
   }
   
   // Create a new model instance
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
   
   // Default system prompt if none is provided
   const defaultPrompt = `You are an AI assistant. Follow the user's instruction very precisely.
